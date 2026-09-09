@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartWaste - Digital Waste Management Platform</title>
+  
+  <!-- SEO & Meta Tags -->
+  <meta name="description" content="SmartWaste is an intelligent eco-tech waste management portal connecting citizens, collectors, recyclers, and municipal authorities for a cleaner future.">
+  <meta name="theme-color" content="#10b981">
+  
+  <!-- Modern Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Chart.js CDN for Visual Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Eco-Tech Design System Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Hackathon / Demo Prototype Disclaimer Banner -->
+  <aside class="prototype-banner" aria-label="Prototype Notice">
+    <span>🌱 <strong>Hackathon Prototype:</strong> Running on client-side <code>localStorage</code> database. Ready for live demonstration.</span>
+  </aside>
+
+  <!-- =========================================================================
+       Sticky Navigation Header
+       ========================================================================= -->
+  <header class="site-header" id="header">
+    <div class="container nav-container">
+      <!-- Brand Logo -->
+      <a href="#home" class="brand-logo" aria-label="SmartWaste Home">
+        <div class="brand-icon">♻</div>
+        <span>Smart</span>Waste
+      </a>
+
+      <!-- Navigation Links -->
+      <nav aria-label="Main Navigation">
+        <ul class="nav-menu" id="navMenu">
+          <li><a href="#home" class="nav-link active">Home</a></li>
+          <li><a href="#about" class="nav-link">About</a></li>
+          <li><a href="#services" class="nav-link">Services</a></li>
+          <li><a href="#report-waste" class="nav-link">Report Waste</a></li>
+          <li><a href="#collection" class="nav-link">Collection</a></li>
+          <li><a href="#recycling" class="nav-link">Recycling</a></li>
+          <li><a href="#dashboards" class="nav-link">Dashboards</a></li>
+          <li><a href="#analytics" class="nav-link">Analytics</a></li>
+          <li><a href="#contact" class="nav-link">Contact</a></li>
+        </ul>
+      </nav>
+
+      <!-- Nav Actions (Search, Notification, Role Badge, Menu Toggle) -->
+      <div class="nav-actions">
+        <!-- Live Global Search -->
+        <div class="global-search-wrapper">
+          <span class="global-search-icon">🔍</span>
+          <input type="text" id="globalSearchInput" placeholder="Search ID, area..." aria-label="Search reports or locations">
+          <div class="search-results-panel" id="globalSearchResultsPanel"></div>
+        </div>
+
+        <!-- Notification Bell -->
+        <button type="button" class="notification-btn" id="notificationToggleBtn" aria-label="View notifications">
+          🔔
+          <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+        </button>
+
+        <!-- Notification Dropdown Panel -->
+        <div class="notification-panel" id="notificationPanel">
+          <div class="notification-header">
+            <h4>Activity Notifications</h4>
+            <button type="button" onclick="markAllNotificationsRead()" style="background:none; border:none; color:var(--primary-dark); font-size:0.75rem; font-weight:700; cursor:pointer;">Mark all read</button>
+          </div>
+          <ul class="notification-list" id="notificationList">
+            <!-- Rendered by JavaScript -->
+          </ul>
+          <div class="notification-footer">
+            <button type="button" onclick="document.getElementById('dashboards').scrollIntoView({behavior:'smooth'}); document.getElementById('notificationPanel').classList.remove('show');">View Full Activity in Dashboard →</button>
+          </div>
+        </div>
+
+        <!-- User Role Switch / Demo Login Button -->
+        <button type="button" class="btn btn-sm btn-outline-primary" id="navAuthBtn" onclick="openModal('modalLogin')">
+          Switch Role
+        </button>
+
+        <!-- Mobile Menu Toggle -->
+        <button type="button" class="mobile-toggle" id="mobileMenuToggle" aria-label="Toggle mobile menu">
+          ☰
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       1. HOME / HERO SECTION
+       ========================================================================= -->
+  <main>
+    <section class="section hero-section" id="home">
+      <div class="container">
+        <div class="hero-grid">
+          <!-- Hero Text Content -->
+          <div class="hero-content">
+            <div class="section-tag">🌱 Smart Eco-Infrastructure 2026</div>
+            <h1>Smart Waste Management for a <span>Cleaner Future</span></h1>
+            <p class="hero-lead">
+              Connecting citizens, waste collectors, recycling facilities, and municipal authorities through an intelligent, transparent waste management network.
+            </p>
+            <div class="hero-cta">
+              <a href="#report-waste" class="btn btn-primary btn-lg">⚠️ Report Waste</a>
+              <a href="#dashboards" class="btn btn-outline btn-lg" onclick="switchDashboardTab('citizenDashboardView')">📊 View Dashboard</a>
+            </div>
+
+            <!-- Dynamic Counters Ribbon -->
+            <div class="hero-stats-row">
+              <div class="stat-card-mini">
+                <span class="stat-val" id="heroStatCollected">1,480 kg</span>
+                <span class="stat-label">Waste Collected</span>
+              </div>
+              <div class="stat-card-mini">
+                <span class="stat-val" id="heroStatRecycled">1,066 kg</span>
+                <span class="stat-label">Waste Recycled</span>
+              </div>
+              <div class="stat-card-mini">
+                <span class="stat-val" id="heroStatResolved">1</span>
+                <span class="stat-label">Reports Resolved</span>
+              </div>
+              <div class="stat-card-mini">
+                <span class="stat-val" id="heroStatRequests">3</span>
+                <span class="stat-label">Pickups Scheduled</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hero Graphic Illustration / Live Monitoring Radar -->
+          <div class="hero-graphic-card">
+            <div class="eco-radar-box">
+              <div class="radar-header">
+                <div class="radar-title">
+                  <div class="pulse-dot"></div>
+                  <span>Municipal Live Feed</span>
+                </div>
+                <span class="badge badge-resolved" style="font-size:0.75rem;">Connected</span>
+              </div>
+
+              <div class="radar-item">
+                <span>📍 Sector 14 Green Park</span>
+                <span class="badge badge-in-progress">In Progress</span>
+              </div>
+              <div class="radar-item">
+                <span>📍 Tech Park Block B</span>
+                <span class="badge badge-assigned">Assigned</span>
+              </div>
+              <div class="radar-item">
+                <span>📍 Downtown Food Plaza</span>
+                <span class="badge badge-resolved">Resolved</span>
+              </div>
+              <div class="radar-item">
+                <span>📍 University Library</span>
+                <span class="badge badge-pending">Pending</span>
+              </div>
+
+              <div style="margin-top: 1.25rem; font-size: 0.8rem; color: #94a3b8; display: flex; justify-content: space-between;">
+                <span>Active Collector Units: <strong>14 Trucks</strong></span>
+                <span>Sensor Health: <strong>99.4%</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         2. ABOUT SECTION
+         ========================================================================= -->
+    <section class="section section-alt" id="about">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">About Platform</div>
+          <h2 class="section-title">Empowering Communities Through Smart Sanitation</h2>
+          <p class="section-subtitle">
+            SmartWaste eliminates inefficient waste accumulation by bridging the gap between proactive citizens, fleet collectors, and recycling plants.
+          </p>
+        </div>
+
+        <div class="grid-4">
+          <!-- Card 1 -->
+          <div class="card card-interactive">
+            <div class="feature-icon-wrapper">🚛</div>
+            <h3>Smart Collection</h3>
+            <p>On-demand door-to-door waste pickups scheduled effortlessly at your preferred date and time slot.</p>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="card card-interactive">
+            <div class="feature-icon-wrapper">📸</div>
+            <h3>Citizen Reporting</h3>
+            <p>Geo-tagged waste reporting with live image upload, automated priority assignment, and real-time tracking.</p>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="card card-interactive">
+            <div class="feature-icon-wrapper">♻️</div>
+            <h3>Recycling Hub</h3>
+            <p>Categorized directory and instant discovery of verified municipal material recovery and e-waste facilities.</p>
+          </div>
+
+          <!-- Card 4 -->
+          <div class="card card-interactive">
+            <div class="feature-icon-wrapper">🏛️</div>
+            <h3>Municipal Monitoring</h3>
+            <p>Centralized oversight for city administrators to assign collectors, resolve grievances, and track metrics.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         3. SERVICES SECTION
+         ========================================================================= -->
+    <section class="section" id="services">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">Core Services</div>
+          <h2 class="section-title">Comprehensive Waste Management Solutions</h2>
+          <p class="section-subtitle">
+            Explore dedicated services engineered to streamline urban waste collection and recycling workflows.
+          </p>
+        </div>
+
+        <div class="grid-3">
+          <!-- Service 1 -->
+          <div class="service-card">
+            <div>
+              <div class="feature-icon-wrapper">📢</div>
+              <h3>1. Report Waste</h3>
+              <p>Spot an overflowing garbage bin or dumped scrap? Submit an instant report with location details and photos.</p>
+            </div>
+            <a href="#report-waste" class="btn btn-outline-primary">File Waste Report →</a>
+          </div>
+
+          <!-- Service 2 -->
+          <div class="service-card">
+            <div>
+              <div class="feature-icon-wrapper">📦</div>
+              <h3>2. Request Collection</h3>
+              <p>Book large quantity doorstep pickups for segregated dry recyclables, construction scrap, or old electronics.</p>
+            </div>
+            <a href="#collection" class="btn btn-outline-primary">Schedule Pickup →</a>
+          </div>
+
+          <!-- Service 3 -->
+          <div class="service-card">
+            <div>
+              <div class="feature-icon-wrapper">🧭</div>
+              <h3>3. Track Complaint</h3>
+              <p>Follow your reported issues through our 5-stage timeline from initial submission to final municipal resolution.</p>
+            </div>
+            <a href="#dashboards" class="btn btn-outline-primary" onclick="switchDashboardTab('citizenDashboardView')">Track Status →</a>
+          </div>
+
+          <!-- Service 4 -->
+          <div class="service-card">
+            <div>
+              <div class="feature-icon-wrapper">🔄</div>
+              <h3>4. Recycling Hub</h3>
+              <p>Discover localized recycling plants, understand recyclability rates, and contact authorized recovery centers.</p>
+            </div>
+            <a href="#recycling" class="btn btn-outline-primary">Locate Centers →</a>
+          </div>
+
+          <!-- Service 5 -->
+          <div class="service-card">
+            <div>
+              <div class="feature-icon-wrapper">🛡️</div>
+              <h3>5. Municipal Monitoring</h3>
+              <p>Municipal ward dashboard for monitoring open tickets, allocating collection trucks, and verifying clearance.</p>
+            </div>
+            <a href="#dashboards" class="btn btn-outline-primary" onclick="switchDashboardTab('adminDashboardView')">Admin Monitor →</a>
+          </div>
+
+          <!-- Service 6 -->
+          <div class="service-card">
+            <div>
+              <div class="feature-icon-wrapper">📈</div>
+              <h3>6. Waste Analytics</h3>
+              <p>Interactive data visualizations detailing category breakdowns, recovery volumes, and district performance.</p>
+            </div>
+            <a href="#analytics" class="btn btn-outline-primary">Explore Charts →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         4. REPORT WASTE SECTION
+         ========================================================================= -->
+    <section class="section section-alt" id="report-waste">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">Citizen Action</div>
+          <h2 class="section-title">Report a Waste Problem</h2>
+          <p class="section-subtitle">
+            Help keep your neighborhood pristine. Fill out the form below to register a ticket directly with municipal sanitation teams.
+          </p>
+        </div>
+
+        <div class="form-card">
+          <form id="reportForm" novalidate>
+            <div class="form-grid">
+              <!-- Citizen Name -->
+              <div class="form-group">
+                <label for="reportName" class="form-label">Full Name <span class="required">*</span></label>
+                <input type="text" id="reportName" class="form-control" placeholder="e.g. Rahul Sharma" required>
+                <div class="invalid-feedback">Please enter your full name.</div>
+              </div>
+
+              <!-- Mobile Number -->
+              <div class="form-group">
+                <label for="reportMobile" class="form-label">Mobile Number <span class="required">*</span></label>
+                <input type="tel" id="reportMobile" class="form-control" placeholder="e.g. 9876543210" maxlength="10" required>
+                <div class="invalid-feedback">Enter a valid 10-digit mobile number.</div>
+              </div>
+
+              <!-- Waste Type -->
+              <div class="form-group">
+                <label for="reportWasteType" class="form-label">Waste Type <span class="required">*</span></label>
+                <select id="reportWasteType" class="form-control" required>
+                  <option value="" disabled selected>Select category...</option>
+                  <option value="Plastic">Plastic</option>
+                  <option value="Paper">Paper</option>
+                  <option value="Food Waste">Food Waste</option>
+                  <option value="E-Waste">E-Waste</option>
+                  <option value="Construction Waste">Construction Waste</option>
+                  <option value="Mixed Waste">Mixed Waste</option>
+                  <option value="Other">Other</option>
+                </select>
+                <div class="invalid-feedback">Please select a waste category.</div>
+              </div>
+
+              <!-- Location -->
+              <div class="form-group">
+                <label for="reportLocation" class="form-label">Exact Location / Landmark <span class="required">*</span></label>
+                <input type="text" id="reportLocation" class="form-control" placeholder="e.g. Near Community Hall, Sector 14" required>
+                <div class="invalid-feedback">Please enter the location.</div>
+              </div>
+
+              <!-- Priority Selector -->
+              <div class="form-group full-width">
+                <label class="form-label">Severity / Priority</label>
+                <div class="priority-selector">
+                  <div class="priority-option">
+                    <input type="radio" id="prioLow" name="reportPriority" value="Low">
+                    <label for="prioLow" class="priority-label">🟢 Low (Minor Scrap)</label>
+                  </div>
+                  <div class="priority-option">
+                    <input type="radio" id="prioMedium" name="reportPriority" value="Medium" checked>
+                    <label for="prioMedium" class="priority-label">🟡 Medium (Standard)</label>
+                  </div>
+                  <div class="priority-option">
+                    <input type="radio" id="prioHigh" name="reportPriority" value="High">
+                    <label for="prioHigh" class="priority-label">🔴 High (Hazard / Overflow)</label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Description -->
+              <div class="form-group full-width">
+                <label for="reportDescription" class="form-label">Description (Optional)</label>
+                <textarea id="reportDescription" class="form-control" rows="3" placeholder="Provide extra details about the waste pile or access notes..."></textarea>
+              </div>
+
+              <!-- Image Upload -->
+              <div class="form-group full-width">
+                <label class="form-label">Attach Photo Evidence</label>
+                <div class="file-dropzone" id="fileDropArea">
+                  <input type="file" id="reportImageFile" accept="image/*" aria-label="Upload photo evidence">
+                  <div class="dropzone-icon">📷</div>
+                  <strong>Click or Drag to Upload Photo</strong>
+                  <p style="font-size: 0.8rem; margin-top: 0.25rem;">Supports JPG, PNG, WEBP (Max 5MB)</p>
+                </div>
+                <!-- Image Preview -->
+                <div class="image-preview-wrapper" id="imagePreviewContainer">
+                  <img id="reportImagePreview" src="" alt="Upload Preview" class="image-preview-thumb">
+                  <span style="font-size:0.85rem; color:var(--primary-dark); font-weight:600;">✓ Photo attached ready for upload</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top: 1.5rem; text-align: right;">
+              <button type="submit" class="btn btn-primary btn-lg" id="btnSubmitReport" style="width: 100%;">
+                🚀 Submit Report
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         5. COLLECTION REQUEST SECTION
+         ========================================================================= -->
+    <section class="section" id="collection">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">On-Demand Pickup</div>
+          <h2 class="section-title">Schedule a Waste Collection</h2>
+          <p class="section-subtitle">
+            Book authorized collectors for bulk household recyclables, commercial dry waste, or renovation debris.
+          </p>
+        </div>
+
+        <div class="form-card">
+          <form id="collectionForm" novalidate>
+            <div class="form-grid">
+              <!-- Waste Type -->
+              <div class="form-group">
+                <label for="colWasteType" class="form-label">Waste Type <span class="required">*</span></label>
+                <select id="colWasteType" class="form-control" required>
+                  <option value="" disabled selected>Select recyclable type...</option>
+                  <option value="Plastic & Paper">Plastic & Paper</option>
+                  <option value="E-Waste">E-Waste & Appliances</option>
+                  <option value="Metal & Glass">Metal & Glass</option>
+                  <option value="Construction Scrap">Construction Scrap</option>
+                  <option value="Bulk Organic Waste">Bulk Organic Waste</option>
+                </select>
+                <div class="invalid-feedback">Please select waste type.</div>
+              </div>
+
+              <!-- Quantity -->
+              <div class="form-group">
+                <label for="colQuantity" class="form-label">Approximate Quantity (in kg) <span class="required">*</span></label>
+                <input type="number" id="colQuantity" class="form-control" placeholder="e.g. 25" min="1" required>
+                <div class="invalid-feedback">Enter a valid positive number.</div>
+              </div>
+
+              <!-- Pickup Location -->
+              <div class="form-group full-width">
+                <label for="colLocation" class="form-label">Pickup Address / Door Number <span class="required">*</span></label>
+                <input type="text" id="colLocation" class="form-control" placeholder="e.g. Apartment 304, Green Heights, Phase 2" required>
+                <div class="invalid-feedback">Please enter the pickup location.</div>
+              </div>
+
+              <!-- Preferred Date -->
+              <div class="form-group">
+                <label for="colDate" class="form-label">Preferred Date <span class="required">*</span></label>
+                <input type="date" id="colDate" class="form-control" required>
+                <div class="invalid-feedback">Select preferred date.</div>
+              </div>
+
+              <!-- Preferred Time Slot -->
+              <div class="form-group">
+                <label for="colTime" class="form-label">Preferred Time Slot <span class="required">*</span></label>
+                <select id="colTime" class="form-control" required>
+                  <option value="" disabled selected>Select time slot...</option>
+                  <option value="08:00 AM - 10:00 AM">Morning (08:00 AM - 10:00 AM)</option>
+                  <option value="10:00 AM - 12:00 PM">Midday (10:00 AM - 12:00 PM)</option>
+                  <option value="02:00 PM - 04:00 PM">Afternoon (02:00 PM - 04:00 PM)</option>
+                  <option value="04:00 PM - 06:00 PM">Evening (04:00 PM - 06:00 PM)</option>
+                </select>
+                <div class="invalid-feedback">Select time slot.</div>
+              </div>
+            </div>
+
+            <div style="margin-top: 1.5rem; text-align: right;">
+              <button type="submit" class="btn btn-secondary btn-lg" id="btnSubmitCollection" style="width: 100%;">
+                📅 Request Collection
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         6. RECYCLING HUB SECTION
+         ========================================================================= -->
+    <section class="section section-alt" id="recycling">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">Circular Economy</div>
+          <h2 class="section-title">Recycling Directory & Materials</h2>
+          <p class="section-subtitle">
+            Explore recyclability indexes for common municipal materials and search authorized recycling drop-off centers.
+          </p>
+        </div>
+
+        <!-- 6 Material Category Cards -->
+        <div class="grid-3" style="margin-bottom: 3.5rem;">
+          <!-- Plastic -->
+          <div class="recycling-cat-card">
+            <div class="recycling-cat-icon">🧴</div>
+            <h4>Plastic Polymers (PET / HDPE)</h4>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" style="width: 82%;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
+              <span>Recyclability: <strong>82%</strong></span>
+              <span>Status: <strong style="color:var(--primary);">High Demand</strong></span>
+            </div>
+          </div>
+
+          <!-- Paper -->
+          <div class="recycling-cat-card">
+            <div class="recycling-cat-icon">📦</div>
+            <h4>Paper & Corrugated Cardboard</h4>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" style="width: 90%;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
+              <span>Recyclability: <strong>90%</strong></span>
+              <span>Status: <strong style="color:var(--primary);">Active</strong></span>
+            </div>
+          </div>
+
+          <!-- Glass -->
+          <div class="recycling-cat-card">
+            <div class="recycling-cat-icon">🍾</div>
+            <h4>Glass Bottles & Jars</h4>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" style="width: 95%;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
+              <span>Recyclability: <strong>95%</strong></span>
+              <span>Status: <strong style="color:var(--primary);">100% Circular</strong></span>
+            </div>
+          </div>
+
+          <!-- Metal -->
+          <div class="recycling-cat-card">
+            <div class="recycling-cat-icon">🥫</div>
+            <h4>Aluminium & Ferrous Scrap</h4>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" style="width: 98%;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
+              <span>Recyclability: <strong>98%</strong></span>
+              <span>Status: <strong style="color:var(--primary);">High Value</strong></span>
+            </div>
+          </div>
+
+          <!-- E-Waste -->
+          <div class="recycling-cat-card">
+            <div class="recycling-cat-icon">💻</div>
+            <h4>Electronic Scrap & Circuitry</h4>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" style="width: 65%;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
+              <span>Recyclability: <strong>65%</strong></span>
+              <span>Status: <strong style="color:var(--accent);">Specialist Only</strong></span>
+            </div>
+          </div>
+
+          <!-- Organic -->
+          <div class="recycling-cat-card">
+            <div class="recycling-cat-icon">🍎</div>
+            <h4>Organic Compost & Green Waste</h4>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" style="width: 100%;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
+              <span>Recyclability: <strong>100%</strong></span>
+              <span>Status: <strong style="color:var(--primary);">Bio-Compost</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Find Recycling Center Search & Filter -->
+        <div class="card" style="margin-bottom: 2rem;">
+          <h3 style="margin-bottom: 1.25rem;">🔍 Find Nearby Recycling Centers</h3>
+          <div class="search-filter-bar">
+            <div class="search-input-box">
+              <span>📍</span>
+              <input type="text" id="recyclingSearchInput" placeholder="Filter by area, landmark or facility name...">
+            </div>
+            <div style="min-width: 200px;">
+              <select id="recyclingCategoryFilter" class="form-control">
+                <option value="all">All Waste Categories</option>
+                <option value="Plastic">Plastic</option>
+                <option value="Paper">Paper</option>
+                <option value="Metal">Metal</option>
+                <option value="Glass">Glass</option>
+                <option value="E-Waste">E-Waste</option>
+                <option value="Organic Waste">Organic Waste</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Dynamic Centers Grid -->
+          <div class="grid-2" id="recyclingCentersGrid">
+            <!-- Rendered by JavaScript -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         7, 8, 9. DASHBOARDS SECTION (Citizen, Collector, Admin)
+         ========================================================================= -->
+    <section class="section" id="dashboards">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">Role-Based Control</div>
+          <h2 class="section-title">Interactive Operation Dashboards</h2>
+          <p class="section-subtitle">
+            Switch between Citizen, Collector, and Municipal Administrator perspectives to test end-to-end status sync.
+          </p>
+        </div>
+
+        <!-- Dashboard Role Tabs -->
+        <div class="dashboard-tabs">
+          <button type="button" class="tab-btn active" data-target="citizenDashboardView">
+            👤 Citizen Dashboard
+          </button>
+          <button type="button" class="tab-btn" data-target="collectorDashboardView">
+            🚛 Collector Dashboard
+          </button>
+          <button type="button" class="tab-btn" data-target="adminDashboardView">
+            🏛️ Municipal Admin Dashboard
+          </button>
+        </div>
+
+        <!-- 7. CITIZEN DASHBOARD VIEW -->
+        <div class="dashboard-view active" id="citizenDashboardView">
+          <!-- Citizen Stat Cards -->
+          <div class="stat-widget-grid">
+            <div class="stat-widget">
+              <div class="widget-icon blue">📝</div>
+              <div class="widget-data">
+                <h4 id="citizenStatTotal">0</h4>
+                <p>Total Reports</p>
+              </div>
+            </div>
+            <div class="stat-widget">
+              <div class="widget-icon amber">⏳</div>
+              <div class="widget-data">
+                <h4 id="citizenStatPending">0</h4>
+                <p>Pending Reports</p>
+              </div>
+            </div>
+            <div class="stat-widget">
+              <div class="widget-icon green">✅</div>
+              <div class="widget-data">
+                <h4 id="citizenStatResolved">0</h4>
+                <p>Resolved Reports</p>
+              </div>
+            </div>
+            <div class="stat-widget">
+              <div class="widget-icon blue">📦</div>
+              <div class="widget-data">
+                <h4 id="citizenStatCollections">0</h4>
+                <p>Collection Requests</p>
+              </div>
+            </div>
+            <div class="stat-widget">
+              <div class="widget-icon green">⚖️</div>
+              <div class="widget-data">
+                <h4 id="citizenStatKgCollected">0 kg</h4>
+                <p>Waste Collected</p>
+              </div>
+            </div>
+            <div class="stat-widget">
+              <div class="widget-icon green">🌱</div>
+              <div class="widget-data">
+                <h4 id="citizenStatKgRecycled">0 kg</h4>
+                <p>Waste Recycled</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Citizen Reports Table -->
+          <div class="card" style="margin-bottom: 2rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+              <h3>My Waste Reports</h3>
+              <a href="#report-waste" class="btn btn-sm btn-primary">+ New Report</a>
+            </div>
+            <div class="table-responsive">
+              <table class="table-custom">
+                <thead>
+                  <tr>
+                    <th>Report ID</th>
+                    <th>Waste Type</th>
+                    <th>Location</th>
+                    <th>Date</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="citizenReportsTableBody">
+                  <!-- Rendered dynamically by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Citizen Collections Table -->
+          <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+              <h3>My Collection Requests</h3>
+              <a href="#collection" class="btn btn-sm btn-secondary">+ Request Pickup</a>
+            </div>
+            <div class="table-responsive">
+              <table class="table-custom">
+                <thead>
+                  <tr>
+                    <th>Pickup ID</th>
+                    <th>Waste Type</th>
+                    <th>Quantity</th>
+                    <th>Address</th>
+                    <th>Scheduled Slot</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="citizenCollectionsTableBody">
+                  <!-- Rendered dynamically by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8. COLLECTOR DASHBOARD VIEW -->
+        <div class="dashboard-view" id="collectorDashboardView">
+          <!-- Collector Stat Cards -->
+          <div class="stat-widget-grid">
+            <div class="stat-widget">
+              <div class="widget-icon blue">📋</div>
+              <div class="widget-data">
+                <h4 id="collectorStatAssigned">0</h4>
+                <p>Assigned Collections</p>
+              </div>
+            </div>
+            <div class="stat-widget">
+              <div class="widget-icon amber">🚚</div>
+              <div class="widget-data">
+                <h4 id="collectorStatToday">0</h4>
+                <p>Active Pickups</p>
+              </div>
+            </div>
+            <div class="stat-widget">
+              <div class="widget-icon green">🏆</div>
+              <div class="widget-data">
+                <h4 id="collectorStatCompleted">0</h4>
+                <p>Completed Pickups</p>
+              </div>
+            </div>
+            <div class="stat-widget">
+              <div class="widget-icon red">⏰</div>
+              <div class="widget-data">
+                <h4 id="collectorStatPending">0</h4>
+                <p>Pending Pickups</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Collector Pickup Cards Grid -->
+          <div class="card">
+            <h3 style="margin-bottom: 1.5rem;">Assigned Pickup Queue & Action Center</h3>
+            <div class="collector-grid" id="collectorPickupsGrid">
+              <!-- Rendered dynamically by JavaScript -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 9. ADMIN DASHBOARD VIEW -->
+        <div class="dashboard-view" id="adminDashboardView">
+          <!-- Admin Stat Widgets -->
+          <div class="stat-widget-grid">
+            <div class="stat-widget">
+              <div class="widget-icon blue">📊</div>
+              <div class="widget-data">
+                <h4 id="adminStatTotalReports">0</h4>
+                <p>Total Reports</p>
+              </div>
+            </div>
+            <div class="stat-widget">
+              <div class="widget-icon amber">⚠️</div>
+              <div class="widget-data">
+                <h4 id="adminStatPendingComplaints">0</h4>
+                <p>Pending Complaints</p>
+              </div>
+            </div>
+            <div class="stat-widget">
+              <div class="widget-icon green">✅</div>
+              <div class="widget-data">
+                <h4 id="adminStatResolvedComplaints">0</h4>
+                <p>Resolved Complaints</p>
+              </div>
+            </div>
+            <div class="stat-widget">
+              <div class="widget-icon green">⚖️</div>
+              <div class="widget-data">
+                <h4 id="adminStatTotalWaste">0 kg</h4>
+                <p>Total Waste Collected</p>
+              </div>
+            </div>
+            <div class="stat-widget">
+              <div class="widget-icon green">♻️</div>
+              <div class="widget-data">
+                <h4 id="adminStatRecyclableWaste">0 kg</h4>
+                <p>Recyclable Waste</p>
+              </div>
+            </div>
+            <div class="stat-widget">
+              <div class="widget-icon blue">🚛</div>
+              <div class="widget-data">
+                <h4 id="adminStatActiveCollectors">14 active</h4>
+                <p>Active Collectors</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Admin Waste Reports Management Table -->
+          <div class="card" style="margin-bottom: 2rem;">
+            <h3 style="margin-bottom: 1.25rem;">Citizen Waste Reports Management</h3>
+            <div class="table-responsive">
+              <table class="table-custom">
+                <thead>
+                  <tr>
+                    <th>Report ID</th>
+                    <th>Reporter Details</th>
+                    <th>Waste Type</th>
+                    <th>Location</th>
+                    <th>Priority</th>
+                    <th>Status Update</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="adminReportsTableBody">
+                  <!-- Rendered dynamically by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Admin Collection Requests Management Table -->
+          <div class="card">
+            <h3 style="margin-bottom: 1.25rem;">Door-to-Door Collection Requests</h3>
+            <div class="table-responsive">
+              <table class="table-custom">
+                <thead>
+                  <tr>
+                    <th>Collection ID</th>
+                    <th>Type & Quantity</th>
+                    <th>Pickup Address</th>
+                    <th>Preferred Date</th>
+                    <th>Status Badge</th>
+                    <th>Change Status</th>
+                  </tr>
+                </thead>
+                <tbody id="adminCollectionsTableBody">
+                  <!-- Rendered dynamically by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         10. ANALYTICS SECTION (Chart.js visual charts)
+         ========================================================================= -->
+    <section class="section section-alt" id="analytics">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">Visual Intelligence</div>
+          <h2 class="section-title">Waste Analytics & Trends</h2>
+          <p class="section-subtitle">
+            Real-time graphical metrics dynamically updated from our local database to support data-driven municipal sanitation decisions.
+          </p>
+        </div>
+
+        <div class="charts-grid">
+          <!-- Chart 1: Waste by Category -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <h4>Waste by Category Breakdown</h4>
+              <span class="badge badge-resolved">Live Metric</span>
+            </div>
+            <div class="chart-canvas-wrapper">
+              <canvas id="chartWasteCategory"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 2: Recyclable vs Non-Recyclable -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <h4>Recyclable vs Non-Recyclable Ratio</h4>
+              <span class="badge badge-resolved">Calculated</span>
+            </div>
+            <div class="chart-canvas-wrapper">
+              <canvas id="chartRecyclable"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 3: Pending vs Resolved -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <h4>Resolution Velocity (Pending vs Resolved)</h4>
+              <span class="badge badge-assigned">Status</span>
+            </div>
+            <div class="chart-canvas-wrapper">
+              <canvas id="chartStatus"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 4: Reports by Area -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <h4>Grievances by Municipal Sector / Ward</h4>
+              <span class="badge badge-in-progress">Area Density</span>
+            </div>
+            <div class="chart-canvas-wrapper">
+              <canvas id="chartArea"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         11. CONTACT SECTION
+         ========================================================================= -->
+    <section class="section" id="contact">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">Support & Assistance</div>
+          <h2 class="section-title">Get in Touch with Municipal Sanitation</h2>
+          <p class="section-subtitle">
+            Need specialized sanitation assistance or want to integrate your housing society with SmartWaste?
+          </p>
+        </div>
+
+        <div class="grid-2">
+          <!-- Contact Info Card -->
+          <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <h3>Municipal Control Room</h3>
+              <p style="margin: 1rem 0 1.5rem;">Our dispatchers monitor civic waste reports 24 hours a day across all zones.</p>
+              
+              <div style="display:grid; gap:1.25rem;">
+                <div style="display:flex; gap:1rem; align-items:center;">
+                  <div class="feature-icon-wrapper" style="margin-bottom:0; width:2.5rem; height:2.5rem; font-size:1.1rem;">📞</div>
+                  <div>
+                    <strong>Civic Helpline</strong>
+                    <p style="font-size:0.9rem;">1800-CLEAN-CITY (Toll Free)</p>
+                  </div>
+                </div>
+
+                <div style="display:flex; gap:1rem; align-items:center;">
+                  <div class="feature-icon-wrapper" style="margin-bottom:0; width:2.5rem; height:2.5rem; font-size:1.1rem;">✉️</div>
+                  <div>
+                    <strong>Official Email</strong>
+                    <p style="font-size:0.9rem;">helpdesk@smartwaste.gov.in</p>
+                  </div>
+                </div>
+
+                <div style="display:flex; gap:1rem; align-items:center;">
+                  <div class="feature-icon-wrapper" style="margin-bottom:0; width:2.5rem; height:2.5rem; font-size:1.1rem;">🏢</div>
+                  <div>
+                    <strong>Central Office</strong>
+                    <p style="font-size:0.9rem;">Solid Waste Management Directorate, Civic Center, Sector 1</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:2rem; padding:1rem; background:var(--primary-light); border-radius:var(--radius-sm); border:1px solid rgba(16, 185, 129, 0.2);">
+              <span style="font-weight:700; color:var(--primary-dark); font-size:0.85rem;">🛡️ Emergency Hazard Response</span>
+              <p style="font-size:0.8rem; margin-top:0.25rem; color:var(--text-main);">For toxic spills or hospital bio-waste emergencies, please dial 112 immediately.</p>
+            </div>
+          </div>
+
+          <!-- Contact Form -->
+          <div class="card">
+            <h3>Send an Inquiry</h3>
+            <form id="contactForm" style="margin-top:1.25rem;">
+              <div class="form-group">
+                <label for="contactName" class="form-label">Your Name</label>
+                <input type="text" id="contactName" class="form-control" placeholder="e.g. Meera Krishnan" required>
+              </div>
+              <div class="form-group">
+                <label for="contactEmail" class="form-label">Email Address</label>
+                <input type="email" id="contactEmail" class="form-control" placeholder="name@example.com" required>
+              </div>
+              <div class="form-group">
+                <label for="contactMessage" class="form-label">Message / Query</label>
+                <textarea id="contactMessage" class="form-control" rows="4" placeholder="How can our sanitation team assist your locality?" required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary" style="width:100%;">Send Message</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =========================================================================
+       MODALS
+       ========================================================================= -->
+
+  <!-- 1. Report Submission Success Modal -->
+  <div class="modal-overlay" id="modalReportSuccess">
+    <div class="modal-dialog">
+      <div class="modal-body" style="text-align: center;">
+        <div class="success-checkmark">✓</div>
+        <h2>Report Submitted!</h2>
+        <p style="margin: 0.75rem 0 1.5rem;">Your waste report has been submitted successfully to municipal sanitation dispatch.</p>
+        
+        <div style="background:var(--bg-alt); padding:1.25rem; border-radius:var(--radius-md); text-align:left; margin-bottom:1.5rem; border:1px solid var(--border);">
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+            <span style="color:var(--text-muted); font-size:0.9rem;">Tracking Report ID:</span>
+            <strong id="successReportId" style="color:var(--primary-dark); font-size:1.1rem;">SW-2026-000</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--text-muted); font-size:0.9rem;">Initial Status:</span>
+            <span class="badge badge-pending" id="successReportStatus">Pending</span>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:0.75rem;">
+          <button type="button" class="btn btn-outline" style="flex:1;" data-close-modal="modalReportSuccess">Close</button>
+          <button type="button" class="btn btn-primary" style="flex:1;" onclick="closeModal('modalReportSuccess'); trackReport(document.getElementById('successReportId').textContent);">Track Progress →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Collection Success Modal -->
+  <div class="modal-overlay" id="modalCollectionSuccess">
+    <div class="modal-dialog">
+      <div class="modal-body" style="text-align: center;">
+        <div class="success-checkmark">✓</div>
+        <h2>Pickup Scheduled!</h2>
+        <p style="margin: 0.75rem 0 1.5rem;">Your on-demand waste collection request has been logged into the collector queue.</p>
+        
+        <div style="background:var(--bg-alt); padding:1.25rem; border-radius:var(--radius-md); text-align:left; margin-bottom:1.5rem; border:1px solid var(--border);">
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+            <span style="color:var(--text-muted); font-size:0.9rem;">Collection ID:</span>
+            <strong id="successColId" style="color:var(--secondary-hover); font-size:1.1rem;">COL-2026-000</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--text-muted); font-size:0.9rem;">Status:</span>
+            <span class="badge badge-pending">Pending Pickup</span>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-primary" style="width:100%;" data-close-modal="modalCollectionSuccess">Got It</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Track Report Timeline Modal -->
+  <div class="modal-overlay" id="modalTrackReport">
+    <div class="modal-dialog" style="max-width: 680px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Live Grievance Tracking: <span id="trackModalReportId" style="color:var(--primary-dark);">SW-2026-001</span></h3>
+        <button type="button" class="modal-close" data-close-modal="modalTrackReport">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="background:var(--bg-alt); padding:1rem; border-radius:var(--radius-md); margin-bottom:1.5rem; display:flex; justify-content:space-between; font-size:0.9rem;">
+          <div>Category: <strong id="trackModalCategory">Plastic</strong></div>
+          <div>Location: <strong id="trackModalLocation">Sector 14</strong></div>
+        </div>
+
+        <!-- 5-Stage Interactive Visual Timeline -->
+        <div class="tracking-timeline" id="trackingTimelineContainer">
+          <!-- Rendered dynamically by JavaScript -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" data-close-modal="modalTrackReport">Close Tracker</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. View Report Details Modal -->
+  <div class="modal-overlay" id="modalViewReport">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Report Details: <span id="viewModalReportId" style="color:var(--primary-dark);">SW-2026-001</span></h3>
+        <button type="button" class="modal-close" data-close-modal="modalViewReport">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:grid; gap:0.75rem; font-size:0.92rem;">
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--text-muted);">Reported By:</span>
+            <strong id="viewModalName">-</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--text-muted);">Contact Phone:</span>
+            <span id="viewModalMobile">-</span>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--text-muted);">Waste Category:</span>
+            <strong id="viewModalType">-</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--text-muted);">Location Landmark:</span>
+            <span id="viewModalLocation">-</span>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--text-muted);">Submission Timestamp:</span>
+            <span id="viewModalDate">-</span>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--text-muted);">Priority Level:</span>
+            <span id="viewModalPriority" class="badge badge-priority-medium">-</span>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--text-muted);">Current Status:</span>
+            <span id="viewModalStatus" class="badge badge-pending">-</span>
+          </div>
+          <div style="border-top:1px solid var(--border); padding-top:0.75rem; margin-top:0.5rem;">
+            <span style="color:var(--text-muted); display:block; margin-bottom:0.25rem;">Description:</span>
+            <p id="viewModalDesc" style="color:var(--text-main); font-size:0.9rem;">-</p>
+          </div>
+          <div>
+            <img id="viewModalImage" src="" alt="Waste Incident Photo" style="width:100%; max-height:220px; object-fit:cover; border-radius:var(--radius-md); border:1px solid var(--border); display:none; margin-top:0.5rem;">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" data-close-modal="modalViewReport">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Demo Login / Role Switcher Modal -->
+  <div class="modal-overlay" id="modalLogin">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Demo Role Authentication</h3>
+        <button type="button" class="modal-close" data-close-modal="modalLogin">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="background:var(--primary-light); padding:0.85rem 1rem; border-radius:var(--radius-sm); font-size:0.85rem; color:var(--primary-dark); margin-bottom:1.25rem;">
+          💡 <strong>Hackathon Demo Note:</strong> Switch your persona below to preview customized dashboard views and role capabilities without a backend.
+        </div>
+
+        <form id="demoLoginForm">
+          <div class="form-group">
+            <label for="demoRoleSelect" class="form-label">Select Persona / User Type</label>
+            <select id="demoRoleSelect" class="form-control" required>
+              <option value="citizen">Citizen (File reports & track collections)</option>
+              <option value="collector">Waste Collector (Accept & clear assigned pickups)</option>
+              <option value="admin">Municipal Admin (Monitor reports & update statuses)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="demoNameInput" class="form-label">Display Name</label>
+            <input type="text" id="demoNameInput" class="form-control" value="Siddharth Sharma" required>
+          </div>
+          <div class="form-group">
+            <label for="demoEmailInput" class="form-label">Email Address (Demo only)</label>
+            <input type="email" id="demoEmailInput" class="form-control" value="sid@smartwaste.org" required>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%;">Set Active Persona</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <!-- =========================================================================
+       FOOTER
+       ========================================================================= -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="brand-logo" style="color: #fff; margin-bottom: 1rem;">
+            <div class="brand-icon">♻</div>
+            <span>Smart</span>Waste
+          </div>
+          <p>
+            An integrated civic technology solution driving zero-waste circular economies and rapid sanitation resolution in modern urban centers.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Platform</h4>
+          <ul class="footer-links">
+            <li><a href="#about">About SmartWaste</a></li>
+            <li><a href="#services">Civic Services</a></li>
+            <li><a href="#report-waste">Report Waste</a></li>
+            <li><a href="#collection">Pickup Booking</a></li>
+            <li><a href="#recycling">Recycling Hub</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Dashboards</h4>
+          <ul class="footer-links">
+            <li><a href="#dashboards" onclick="switchDashboardTab('citizenDashboardView')">Citizen Portal</a></li>
+            <li><a href="#dashboards" onclick="switchDashboardTab('collectorDashboardView')">Collector Hub</a></li>
+            <li><a href="#dashboards" onclick="switchDashboardTab('adminDashboardView')">Municipal Admin</a></li>
+            <li><a href="#analytics">Live Analytics</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Civic Helpline</h4>
+          <p style="font-size:0.88rem; margin-bottom:0.5rem;">Toll Free: <strong>1800-CLEAN-CITY</strong></p>
+          <p style="font-size:0.88rem; margin-bottom:1rem;">Operational: 24 Hours / 7 Days</p>
+          <button type="button" class="btn btn-sm btn-outline-primary" onclick="openModal('modalLogin')">Demo Role Switch</button>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 SmartWaste Project. College Hackathon Prototype. Built with pure HTML5, CSS3 & Vanilla JS.</p>
+        <p>Data stored locally via <code>localStorage</code></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Logic -->
+  <script src="js/script.js"></script>
+</body>
+</html>
