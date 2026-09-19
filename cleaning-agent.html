@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cleaning Agent Dashboard - Clean Connect</title>
+  
+  <meta name="description" content="Cleaning Agent field operational center for accepting waste pickups and completing assigned gutter cleaning tasks.">
+  <meta name="theme-color" content="#0ea5e9">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Design System Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .agent-header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--secondary-light);
+      color: var(--secondary-hover);
+      padding: 0.4rem 0.9rem;
+      border-radius: var(--radius-full);
+      font-size: 0.82rem;
+      font-weight: 700;
+      border: 1px solid rgba(14, 165, 233, 0.25);
+    }
+  </style>
+</head>
+<body style="background-color: var(--bg-main);">
+
+  <!-- Top Portal Navigation -->
+  <header class="site-header">
+    <div class="container nav-container">
+      <div style="display:flex; align-items:center; gap:1.25rem;">
+        <a href="index.html" class="brand-logo" aria-label="Return to Home">
+          <div class="brand-icon">🚛</div>
+          <span>Clean</span>Connect
+        </a>
+        <span class="agent-header-badge">Cleaning Agent Operations Hub</span>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:1rem;">
+        <a href="gram-panchayat.html" target="_blank" class="btn btn-sm btn-outline" title="Open Gram Panchayat Dashboard in a new tab">
+          Gram Panchayat Admin ↗
+        </a>
+        <a href="index.html" class="btn btn-sm btn-primary">
+          ← Citizen Portal
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="padding-top: 2.5rem; padding-bottom: 4rem;">
+
+    <!-- Cleaning Agent Title Banner -->
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem; margin-bottom: 2rem;">
+      <div>
+        <div class="section-tag" style="background:var(--secondary-light); color:var(--secondary-hover); border-color:rgba(14, 165, 233, 0.3);">Field Action Center</div>
+        <h1 style="font-size: clamp(1.8rem, 3.5vw, 2.4rem); margin: 0.35rem 0;">Cleaning Agent Task Dispatch</h1>
+        <p style="color:var(--text-muted); max-width:720px;">
+          View your daily route assignments, accept gutter de-silting calls, and update pickup statuses directly from the field.
+        </p>
+      </div>
+
+      <!-- Agent Switcher Selector -->
+      <div class="card" style="padding:1rem 1.25rem; display:flex; flex-direction:column; gap:0.4rem; min-width:280px;">
+        <label for="agentFilterSelect" style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">
+          Active Cleaning Worker
+        </label>
+        <select id="agentFilterSelect" class="form-control form-control-sm" style="font-weight:600;" onchange="renderCleaningAgentDashboard()">
+          <option value="all">⭐ View All Active Tasks (All Agents)</option>
+          <option value="Ramesh Kumar" selected>Ramesh Kumar (Ward 1 & 2 - North)</option>
+          <option value="Suresh Yadav">Suresh Yadav (Ward 3 & 4 - Central)</option>
+          <option value="Rajesh Shinde">Rajesh Shinde (Ward 5 & 6 - School)</option>
+          <option value="Sunita Devi">Sunita Devi (Ward 7 - West Colony)</option>
+          <option value="Vikram Singh">Vikram Singh (Drainage Unit)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Agent Quick Metrics -->
+    <div class="stat-widget-grid" style="margin-bottom: 2.5rem;">
+      <div class="stat-widget">
+        <div class="widget-icon blue">📋</div>
+        <div class="widget-data">
+          <h4 id="agentStatTotalTasks">0</h4>
+          <p>Assigned Tasks</p>
+        </div>
+      </div>
+      <div class="stat-widget">
+        <div class="widget-icon amber">🌊</div>
+        <div class="widget-data">
+          <h4 id="agentStatActiveGutter">0</h4>
+          <p>Active Gutter Jobs</p>
+        </div>
+      </div>
+      <div class="stat-widget">
+        <div class="widget-icon blue">🚚</div>
+        <div class="widget-data">
+          <h4 id="agentStatActivePickups">0</h4>
+          <p>Active Pickups</p>
+        </div>
+      </div>
+      <div class="stat-widget">
+        <div class="widget-icon green">🏆</div>
+        <div class="widget-data">
+          <h4 id="agentStatCompletedToday">0</h4>
+          <p>Tasks Completed</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================================================================
+         SECTION 1: ASSIGNED GUTTER CLEANING TASKS (Requirement 11)
+         ========================================================================= -->
+    <section class="card" style="margin-bottom: 2.5rem; border: 1.5px solid rgba(14, 165, 233, 0.3); box-shadow: var(--shadow-md);">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom: 1.5rem; border-bottom:1px solid var(--border); padding-bottom:1.25rem;">
+        <div>
+          <div style="display:flex; align-items:center; gap:0.6rem;">
+            <span style="font-size:1.5rem;">🌊</span>
+            <h2 style="font-size:1.45rem; margin:0;">Assigned Gutter Cleaning Operations</h2>
+          </div>
+          <p style="font-size:0.9rem; color:var(--text-muted); margin-top:0.25rem;">
+            Drainage clearances, silt unblocking, and stormwater culvert maintenance assigned to your crew.
+          </p>
+        </div>
+        <span class="badge badge-in-progress" style="font-size:0.85rem;">Priority Field Tasks</span>
+      </div>
+
+      <div class="collector-grid" id="agentGutterGrid">
+        <!-- Rendered by JavaScript -->
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         SECTION 2: DOOR-TO-DOOR RECYCLABLES & BULK PICKUPS
+         ========================================================================= -->
+    <section class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom: 1.5rem; border-bottom:1px solid var(--border); padding-bottom:1.25rem;">
+        <div>
+          <div style="display:flex; align-items:center; gap:0.6rem;">
+            <span style="font-size:1.5rem;">📦</span>
+            <h2 style="font-size:1.45rem; margin:0;">Door-to-Door Waste Collection Queue</h2>
+          </div>
+          <p style="font-size:0.9rem; color:var(--text-muted); margin-top:0.25rem;">
+            Doorstep dry waste, e-waste, and recyclable collection requests scheduled by local residents.
+          </p>
+        </div>
+      </div>
+
+      <div class="collector-grid" id="agentPickupsGrid">
+        <!-- Rendered by JavaScript -->
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         SECTION 3: ASSIGNED GENERAL GRIEVANCE CLEANUPS
+         ========================================================================= -->
+    <section class="card" style="margin-top: 2.5rem;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom: 1.5rem; border-bottom:1px solid var(--border); padding-bottom:1.25rem;">
+        <div>
+          <div style="display:flex; align-items:center; gap:0.6rem;">
+            <span style="font-size:1.5rem;">📢</span>
+            <h2 style="font-size:1.45rem; margin:0;">Assigned Citizen Grievance Cleanups</h2>
+          </div>
+          <p style="font-size:0.9rem; color:var(--text-muted); margin-top:0.25rem;">
+            Open street garbage dumps or waste sites assigned for rapid municipal clearance.
+          </p>
+        </div>
+      </div>
+
+      <div class="collector-grid" id="agentReportsGrid">
+        <!-- Rendered by JavaScript -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <!-- Application Logic -->
+  <script src="js/script.js"></script>
+</body>
+</html>

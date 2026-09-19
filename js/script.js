@@ -12,7 +12,9 @@ const STORAGE_KEYS = {
   COLLECTIONS: 'smartwaste_collections',
   NOTIFICATIONS: 'smartwaste_notifications',
   USER: 'smartwaste_user',
-  CENTERS: 'smartwaste_recycling_centers'
+  CENTERS: 'smartwaste_recycling_centers',
+  GUTTER_REQUESTS: 'smartwaste_gutter_requests',
+  CLEANING_AGENTS: 'smartwaste_cleaning_agents'
 };
 
 // Global Chart Instances
@@ -222,9 +224,72 @@ function initializeDefaultData() {
     const defaultUser = {
       name: 'Siddharth (Citizen)',
       role: 'citizen',
-      email: 'citizen@smartwaste.org'
+      email: 'citizen@cleanconnect.org'
     };
     localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(defaultUser));
+  }
+
+  // 6. Initial Cleaning Agents
+  if (!localStorage.getItem(STORAGE_KEYS.CLEANING_AGENTS)) {
+    const initialAgents = [
+      { id: 'CA-01', name: 'Ramesh Kumar', phone: '9823145670', ward: 'Ward 1 & 2 (North)', status: 'Active' },
+      { id: 'CA-02', name: 'Suresh Yadav', phone: '9845123890', ward: 'Ward 3 & 4 (Central & Bazar)', status: 'Active' },
+      { id: 'CA-03', name: 'Rajesh Shinde', phone: '9765431289', ward: 'Ward 5 & 6 (School & Hospital)', status: 'Active' },
+      { id: 'CA-04', name: 'Sunita Devi', phone: '9912345678', ward: 'Ward 7 (West Colony)', status: 'Active' },
+      { id: 'CA-05', name: 'Vikram Singh', phone: '9890123456', ward: 'Drainage & Heavy Clearance Team', status: 'Active' }
+    ];
+    localStorage.setItem(STORAGE_KEYS.CLEANING_AGENTS, JSON.stringify(initialAgents));
+  }
+
+  // 7. Initial Gutter Cleaning Requests
+  if (!localStorage.getItem(STORAGE_KEYS.GUTTER_REQUESTS)) {
+    const initialGutterRequests = [
+      {
+        id: 'GC-2026-001',
+        residentName: 'Mahesh Deshmukh',
+        mobile: '9876543210',
+        location: 'Ward 3, Near Primary Health Center Main Drain',
+        description: 'Severe sludge blockage causing dirty water overflow across pedestrian walkway. High foul odor.',
+        priority: 'High',
+        status: 'In Progress',
+        assignedAgent: 'Suresh Yadav',
+        date: '2026-09-08 10:15 AM'
+      },
+      {
+        id: 'GC-2026-002',
+        residentName: 'Kavita Patil',
+        mobile: '9822334455',
+        location: 'Ward 2, Shivaji Chowk Bazar Gutter Line',
+        description: 'Plastic bottles and vegetable waste choking rainwater drainage culvert.',
+        priority: 'High',
+        status: 'Assigned',
+        assignedAgent: 'Ramesh Kumar',
+        date: '2026-09-09 08:30 AM'
+      },
+      {
+        id: 'GC-2026-003',
+        residentName: 'Santosh Jadhav',
+        mobile: '9765123456',
+        location: 'Ward 5, Backside Zilla Parishad School',
+        description: 'Silt accumulation after heavy showers. Water stagnant and attracting mosquitoes.',
+        priority: 'Medium',
+        status: 'Pending',
+        assignedAgent: 'Unassigned',
+        date: '2026-09-09 01:45 PM'
+      },
+      {
+        id: 'GC-2026-004',
+        residentName: 'Anil Shinde',
+        mobile: '9890765432',
+        location: 'Ward 1, Gaothan Old Well Drainage Canal',
+        description: 'Blocked stormwater pipe with debris. Cleared by municipal drainage crew.',
+        priority: 'Low',
+        status: 'Cleaned',
+        assignedAgent: 'Ramesh Kumar',
+        date: '2026-09-07 11:00 AM'
+      }
+    ];
+    localStorage.setItem(STORAGE_KEYS.GUTTER_REQUESTS, JSON.stringify(initialGutterRequests));
   }
 }
 
@@ -249,6 +314,83 @@ function saveCollection(collection) {
   const collections = loadCollections();
   collections.unshift(collection);
   localStorage.setItem(STORAGE_KEYS.COLLECTIONS, JSON.stringify(collections));
+}
+
+function loadGutterRequests() {
+  const data = localStorage.getItem(STORAGE_KEYS.GUTTER_REQUESTS);
+  return data ? JSON.parse(data) : [];
+}
+
+function saveGutterRequest(req) {
+  const requests = loadGutterRequests();
+  requests.unshift(req);
+  localStorage.setItem(STORAGE_KEYS.GUTTER_REQUESTS, JSON.stringify(requests));
+}
+
+function loadCleaningAgents() {
+  const data = localStorage.getItem(STORAGE_KEYS.CLEANING_AGENTS);
+  return data ? JSON.parse(data) : [];
+}
+
+function assignCleaningAgentToGutter(requestId, agentName) {
+  const requests = loadGutterRequests();
+  const req = requests.find(r => r.id === requestId);
+  if (!req) return;
+
+  req.assignedAgent = agentName;
+  if (req.status === 'Pending' && agentName !== 'Unassigned') {
+    req.status = 'Assigned';
+  }
+  localStorage.setItem(STORAGE_KEYS.GUTTER_REQUESTS, JSON.stringify(requests));
+  createNotification(`Cleaning agent "${agentName}" assigned to Gutter Request ${requestId}`, 'info');
+  showToast(`Assigned ${agentName} to ${requestId}`, 'success');
+
+  if (typeof renderGramPanchayatDashboard === 'function') renderGramPanchayatDashboard();
+  if (typeof renderCleaningAgentDashboard === 'function') renderCleaningAgentDashboard();
+}
+
+function updateGutterStatus(requestId, newStatus) {
+  const requests = loadGutterRequests();
+  const req = requests.find(r => r.id === requestId);
+  if (!req) return;
+
+  req.status = newStatus;
+  localStorage.setItem(STORAGE_KEYS.GUTTER_REQUESTS, JSON.stringify(requests));
+  createNotification(`Gutter Request ${requestId} status changed to "${newStatus}"`, 'info');
+  showToast(`Gutter task ${requestId} marked as ${newStatus}`, 'success');
+
+  if (typeof renderGramPanchayatDashboard === 'function') renderGramPanchayatDashboard();
+  if (typeof renderCleaningAgentDashboard === 'function') renderCleaningAgentDashboard();
+}
+
+function assignAgentToCollection(colId, agentName) {
+  const collections = loadCollections();
+  const col = collections.find(c => c.id === colId);
+  if (!col) return;
+  col.assignedAgent = agentName;
+  if (col.status === 'Pending' && agentName !== 'Unassigned') {
+    col.status = 'Assigned';
+  }
+  localStorage.setItem(STORAGE_KEYS.COLLECTIONS, JSON.stringify(collections));
+  createNotification(`Agent "${agentName}" assigned to Pickup ${colId}`, 'info');
+  showToast(`Assigned ${agentName} to ${colId}`, 'success');
+  if (typeof renderGramPanchayatDashboard === 'function') renderGramPanchayatDashboard();
+  if (typeof renderCleaningAgentDashboard === 'function') renderCleaningAgentDashboard();
+}
+
+function assignAgentToReport(reportId, agentName) {
+  const reports = loadReports();
+  const rep = reports.find(r => r.id === reportId);
+  if (!rep) return;
+  rep.assignedAgent = agentName;
+  if (rep.status === 'Pending' && agentName !== 'Unassigned') {
+    rep.status = 'Assigned';
+  }
+  localStorage.setItem(STORAGE_KEYS.REPORTS, JSON.stringify(reports));
+  createNotification(`Agent "${agentName}" assigned to Report ${reportId}`, 'info');
+  showToast(`Assigned ${agentName} to ${reportId}`, 'success');
+  if (typeof renderGramPanchayatDashboard === 'function') renderGramPanchayatDashboard();
+  if (typeof renderCleaningAgentDashboard === 'function') renderCleaningAgentDashboard();
 }
 
 function loadNotifications() {
@@ -454,7 +596,24 @@ function submitWasteReport(event) {
     };
 
     saveReport(newReport);
-    createNotification(`New report ${reportId} submitted for ${newReport.wasteType} at ${newReport.location}`, 'success');
+    if (newReport.wasteType.toLowerCase().includes('gutter')) {
+      const gutterId = `GC-${reportId.replace('SW-', '')}`;
+      saveGutterRequest({
+        id: gutterId,
+        reportId: reportId,
+        residentName: newReport.name,
+        mobile: newReport.mobile,
+        location: newReport.location,
+        description: newReport.description,
+        priority: newReport.priority,
+        status: 'Pending',
+        assignedAgent: 'Unassigned',
+        date: formattedDate
+      });
+      createNotification(`Gutter cleaning task ${gutterId} registered for ${newReport.location}`, 'warning');
+    } else {
+      createNotification(`New report ${reportId} submitted for ${newReport.wasteType} at ${newReport.location}`, 'success');
+    }
 
     // Reset Form
     document.getElementById('reportForm').reset();
@@ -1135,17 +1294,27 @@ function updateAnalytics() {
 
 // --- Dashboard Role & Tab Switcher ---
 function switchDashboardTab(targetViewId) {
+  if (targetViewId === 'collectorDashboardView' || targetViewId === 'cleaningAgent') {
+    window.open('cleaning-agent.html', '_blank');
+    return;
+  }
+  if (targetViewId === 'adminDashboardView' || targetViewId === 'gramPanchayat') {
+    window.open('gram-panchayat.html', '_blank');
+    return;
+  }
+
+  // Citizen / User Dashboard stays on main page
   const tabs = document.querySelectorAll('.tab-btn');
   const views = document.querySelectorAll('.dashboard-view');
 
   tabs.forEach(t => t.classList.remove('active'));
   views.forEach(v => v.classList.remove('active'));
 
-  const targetView = document.getElementById(targetViewId);
+  const targetView = document.getElementById(targetViewId || 'citizenDashboardView');
   if (targetView) targetView.classList.add('active');
 
   // Highlight active tab
-  const activeTab = document.querySelector(`.tab-btn[data-target="${targetViewId}"]`);
+  const activeTab = document.querySelector(`.tab-btn[data-target="${targetViewId || 'citizenDashboardView'}"]`);
   if (activeTab) activeTab.classList.add('active');
 
   // Scroll to dashboard section smoothly
@@ -1157,21 +1326,26 @@ function switchDashboardTab(targetViewId) {
 
 // --- Demo Authentication / Role Switcher ---
 function loginUser(role, name, email) {
+  const roleDisplayNames = {
+    citizen: 'Citizen User',
+    collector: 'Cleaning Agent',
+    admin: 'Gram Panchayat Officer'
+  };
   const user = {
     role: role,
-    name: name || `${role.charAt(0).toUpperCase() + role.slice(1)} User`,
-    email: email || `${role}@smartwaste.org`
+    name: name || roleDisplayNames[role] || 'User',
+    email: email || `${role}@cleanconnect.org`
   };
   localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
   updateUserUI();
   closeModal('modalLogin');
-  showToast(`Logged in as ${user.name} (${user.role})`, 'success');
+  showToast(`Active persona: ${user.name}`, 'success');
 
-  // Redirect to corresponding dashboard view
+  // Open corresponding dashboard in new tab for Gram Panchayat and Cleaning Agent
   if (role === 'collector') {
-    switchDashboardTab('collectorDashboardView');
+    window.open('cleaning-agent.html', '_blank');
   } else if (role === 'admin') {
-    switchDashboardTab('adminDashboardView');
+    window.open('gram-panchayat.html', '_blank');
   } else {
     switchDashboardTab('citizenDashboardView');
   }
@@ -1391,4 +1565,375 @@ document.addEventListener('DOMContentLoaded', () => {
       loginUser(role, name, email);
     });
   }
+
+  // Auto-render if on Gram Panchayat page or Cleaning Agent page
+  if (document.getElementById('gpGutterTableBody')) {
+    renderGramPanchayatDashboard();
+  }
+  if (document.getElementById('agentGutterGrid')) {
+    renderCleaningAgentDashboard();
+  }
 });
+
+// =========================================================================
+// GRAM PANCHAYAT / ADMIN DASHBOARD LOGIC
+// =========================================================================
+function renderGramPanchayatDashboard() {
+  const reports = loadReports();
+  const collections = loadCollections();
+  const gutterRequests = loadGutterRequests();
+  const agents = loadCleaningAgents();
+
+  // Metrics
+  const totalGrievances = reports.length;
+  const pendingComplaints = reports.filter(r => r.status !== 'Resolved').length;
+  const resolvedComplaints = reports.filter(r => r.status === 'Resolved').length;
+  const totalGutter = gutterRequests.length;
+  const pendingGutter = gutterRequests.filter(g => g.status !== 'Cleaned').length;
+  const cleanedGutter = gutterRequests.filter(g => g.status === 'Cleaned').length;
+
+  setElementText('gpStatTotalComplaints', totalGrievances);
+  setElementText('gpStatPendingComplaints', pendingComplaints);
+  setElementText('gpStatResolvedComplaints', resolvedComplaints);
+  setElementText('gpStatTotalGutter', totalGutter);
+  setElementText('gpStatPendingGutter', pendingGutter);
+  setElementText('gpStatCleanedGutter', cleanedGutter);
+  setElementText('gpStatActiveAgents', `${agents.length} On Duty`);
+
+  // 1. Gutter Cleaning Requests Table
+  const gutterTableBody = document.getElementById('gpGutterTableBody');
+  if (gutterTableBody) {
+    if (gutterRequests.length === 0) {
+      gutterTableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--text-muted);">No gutter cleaning requests logged.</td></tr>`;
+    } else {
+      gutterTableBody.innerHTML = gutterRequests.map(g => {
+        const agentOptions = agents.map(a => `
+          <option value="${escapeHtml(a.name)}" ${g.assignedAgent === a.name ? 'selected' : ''}>
+            ${escapeHtml(a.name)} (${escapeHtml(a.ward)})
+          </option>
+        `).join('');
+
+        const statusOptions = ['Pending', 'Assigned', 'In Progress', 'Cleaned'].map(st => `
+          <option value="${st}" ${g.status === st ? 'selected' : ''}>${st}</option>
+        `).join('');
+
+        return `
+          <tr>
+            <td><strong style="color:var(--primary-dark);">${escapeHtml(g.id)}</strong></td>
+            <td>
+              <strong>${escapeHtml(g.residentName)}</strong><br>
+              <small style="color:var(--text-muted);">${escapeHtml(g.mobile)}</small>
+            </td>
+            <td>
+              <strong>${escapeHtml(g.location)}</strong><br>
+              <small style="color:var(--text-muted);">${escapeHtml(g.description)}</small>
+            </td>
+            <td><span class="badge badge-priority-${g.priority.toLowerCase()}">${escapeHtml(g.priority)}</span></td>
+            <td>${escapeHtml(g.date)}</td>
+            <td><span class="badge badge-${g.status.toLowerCase().replace(' ', '-')}">${escapeHtml(g.status)}</span></td>
+            <td>
+              <select class="form-control form-control-sm" style="font-size:0.8rem; padding:0.3rem 0.5rem; min-width:140px;" onchange="assignCleaningAgentToGutter('${g.id}', this.value)">
+                <option value="Unassigned" ${g.assignedAgent === 'Unassigned' ? 'selected' : ''}>-- Assign Agent --</option>
+                ${agentOptions}
+              </select>
+            </td>
+            <td>
+              <select class="form-control form-control-sm" style="font-size:0.8rem; padding:0.3rem 0.5rem; min-width:110px;" onchange="updateGutterStatus('${g.id}', this.value)">
+                ${statusOptions}
+              </select>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+  }
+
+  // 2. Waste Grievance Reports Table
+  const reportsTableBody = document.getElementById('gpReportsTableBody');
+  if (reportsTableBody) {
+    if (reports.length === 0) {
+      reportsTableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--text-muted);">No reports filed yet.</td></tr>`;
+    } else {
+      reportsTableBody.innerHTML = reports.map(r => {
+        const agentOptions = agents.map(a => `
+          <option value="${escapeHtml(a.name)}" ${r.assignedAgent === a.name ? 'selected' : ''}>
+            ${escapeHtml(a.name)}
+          </option>
+        `).join('');
+
+        return `
+          <tr>
+            <td><strong>${escapeHtml(r.id)}</strong></td>
+            <td>${escapeHtml(r.name)}<br><small style="color:var(--text-muted)">${escapeHtml(r.mobile)}</small></td>
+            <td>${escapeHtml(r.wasteType)}</td>
+            <td>${escapeHtml(r.location)}</td>
+            <td><span class="badge badge-priority-${r.priority.toLowerCase()}">${escapeHtml(r.priority)}</span></td>
+            <td>
+              <select class="form-control form-control-sm" style="font-size:0.82rem; padding:0.3rem 0.5rem;" onchange="updateReportStatus('${r.id}', this.value)">
+                <option value="Pending" ${r.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                <option value="Assigned" ${r.status === 'Assigned' ? 'selected' : ''}>Assigned</option>
+                <option value="In Progress" ${r.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                <option value="Resolved" ${r.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
+              </select>
+            </td>
+            <td>
+              <select class="form-control form-control-sm" style="font-size:0.82rem; padding:0.3rem 0.5rem;" onchange="assignAgentToReport('${r.id}', this.value)">
+                <option value="Unassigned" ${!r.assignedAgent || r.assignedAgent === 'Unassigned' ? 'selected' : ''}>-- Assign Agent --</option>
+                ${agentOptions}
+              </select>
+            </td>
+            <td>
+              <button type="button" class="btn btn-sm btn-outline" onclick="viewReport('${r.id}')">View</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+  }
+
+  // 3. Collection Requests Table
+  const colTableBody = document.getElementById('gpCollectionsTableBody');
+  if (colTableBody) {
+    if (collections.length === 0) {
+      colTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:2rem; color:var(--text-muted);">No pickups scheduled.</td></tr>`;
+    } else {
+      colTableBody.innerHTML = collections.map(c => {
+        const agentOptions = agents.map(a => `
+          <option value="${escapeHtml(a.name)}" ${c.assignedAgent === a.name ? 'selected' : ''}>
+            ${escapeHtml(a.name)}
+          </option>
+        `).join('');
+
+        return `
+          <tr>
+            <td><strong>${escapeHtml(c.id)}</strong></td>
+            <td>${escapeHtml(c.wasteType)} (${escapeHtml(c.quantity)})</td>
+            <td>${escapeHtml(c.location)}</td>
+            <td>${escapeHtml(c.date)} (${escapeHtml(c.time)})</td>
+            <td>
+              <select class="form-control form-control-sm" style="font-size:0.82rem; padding:0.3rem 0.5rem;" onchange="updateCollectionStatus('${c.id}', this.value)">
+                <option value="Pending" ${c.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                <option value="Assigned" ${c.status === 'Assigned' ? 'selected' : ''}>Assigned</option>
+                <option value="In Progress" ${c.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                <option value="Completed" ${c.status === 'Completed' ? 'selected' : ''}>Completed</option>
+              </select>
+            </td>
+            <td>
+              <select class="form-control form-control-sm" style="font-size:0.82rem; padding:0.3rem 0.5rem;" onchange="assignAgentToCollection('${c.id}', this.value)">
+                <option value="Unassigned" ${!c.assignedAgent || c.assignedAgent === 'Unassigned' ? 'selected' : ''}>-- Assign Agent --</option>
+                ${agentOptions}
+              </select>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+  }
+}
+
+// =========================================================================
+// CLEANING AGENT DASHBOARD LOGIC
+// =========================================================================
+function renderCleaningAgentDashboard() {
+  const gutterRequests = loadGutterRequests();
+  const collections = loadCollections();
+  const reports = loadReports();
+
+  const filterSelect = document.getElementById('agentFilterSelect');
+  const selectedAgent = filterSelect ? filterSelect.value : 'all';
+
+  // Filter tasks for this agent
+  const myGutter = selectedAgent === 'all' 
+    ? gutterRequests 
+    : gutterRequests.filter(g => g.assignedAgent === selectedAgent || g.assignedAgent === 'Unassigned');
+
+  const myCollections = selectedAgent === 'all'
+    ? collections
+    : collections.filter(c => c.assignedAgent === selectedAgent || (!c.assignedAgent && c.status !== 'Completed'));
+
+  const myReports = selectedAgent === 'all'
+    ? reports
+    : reports.filter(r => r.assignedAgent === selectedAgent);
+
+  // Metrics
+  const totalTasks = myGutter.length + myCollections.length + myReports.length;
+  const activeGutter = myGutter.filter(g => g.status === 'Assigned' || g.status === 'In Progress').length;
+  const activePickups = myCollections.filter(c => c.status === 'Assigned' || c.status === 'In Progress').length;
+  const completedTasks = myGutter.filter(g => g.status === 'Cleaned').length + 
+                         myCollections.filter(c => c.status === 'Completed').length +
+                         myReports.filter(r => r.status === 'Resolved').length;
+
+  setElementText('agentStatTotalTasks', totalTasks);
+  setElementText('agentStatActiveGutter', activeGutter);
+  setElementText('agentStatActivePickups', activePickups);
+  setElementText('agentStatCompletedToday', completedTasks);
+
+  // 1. Gutter Tasks Action Center
+  const gutterContainer = document.getElementById('agentGutterGrid');
+  if (gutterContainer) {
+    if (myGutter.length === 0) {
+      gutterContainer.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 2.5rem; color: var(--text-muted); background:#fff; border-radius:var(--radius-md); border:1px solid var(--border);">No gutter cleaning tasks assigned currently. Clean and clear!</div>`;
+    } else {
+      gutterContainer.innerHTML = myGutter.map(g => `
+        <div class="pickup-card" style="border-left: 4px solid ${g.status === 'Cleaned' ? 'var(--primary)' : g.status === 'In Progress' ? 'var(--secondary)' : 'var(--accent)'};">
+          <div class="pickup-card-header">
+            <div>
+              <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">GUTTER TASK</span>
+              <h4 style="color: var(--primary-dark); font-size:1.1rem;">${escapeHtml(g.id)}</h4>
+            </div>
+            <div style="display:flex; gap:0.4rem; align-items:center;">
+              <span class="badge badge-priority-${g.priority.toLowerCase()}">${escapeHtml(g.priority)}</span>
+              <span class="badge badge-${g.status.toLowerCase().replace(' ', '-')}">${escapeHtml(g.status)}</span>
+            </div>
+          </div>
+
+          <div class="pickup-details" style="margin: 0.75rem 0;">
+            <div><strong>📍 Location:</strong> ${escapeHtml(g.location)}</div>
+            <div><strong>⚠️ Issue:</strong> ${escapeHtml(g.description)}</div>
+            <div><strong>👤 Resident:</strong> ${escapeHtml(g.residentName)} (${escapeHtml(g.mobile)})</div>
+            <div><strong>👷 Assigned To:</strong> <span style="color:var(--primary-dark); font-weight:700;">${escapeHtml(g.assignedAgent)}</span></div>
+            <div><strong>🕒 Logged:</strong> ${escapeHtml(g.date)}</div>
+          </div>
+
+          <div class="pickup-actions" style="display:flex; gap:0.5rem; margin-top:1rem;">
+            ${g.status === 'Pending' ? `
+              <button type="button" class="btn btn-sm btn-outline-primary" style="flex:1;" onclick="updateGutterStatus('${g.id}', 'Assigned')">Accept Task</button>
+            ` : ''}
+            ${g.status === 'Assigned' ? `
+              <button type="button" class="btn btn-sm btn-secondary" style="flex:1;" onclick="updateGutterStatus('${g.id}', 'In Progress')">Start Cleaning (In Progress)</button>
+            ` : ''}
+            ${g.status === 'In Progress' ? `
+              <button type="button" class="btn btn-sm btn-success" style="flex:1;" onclick="updateGutterStatus('${g.id}', 'Cleaned')">Mark as Cleaned ✓</button>
+            ` : ''}
+            ${g.status === 'Cleaned' ? `
+              <button type="button" class="btn btn-sm btn-outline" style="flex:1;" disabled>✓ Cleaned & Clear</button>
+            ` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+
+  // 2. Doorstep Pickups Action Center
+  const pickupsContainer = document.getElementById('agentPickupsGrid');
+  if (pickupsContainer) {
+    if (myCollections.length === 0) {
+      pickupsContainer.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 2.5rem; color: var(--text-muted); background:#fff; border-radius:var(--radius-md); border:1px solid var(--border);">No waste pickups assigned.</div>`;
+    } else {
+      pickupsContainer.innerHTML = myCollections.map(c => `
+        <div class="pickup-card">
+          <div class="pickup-card-header">
+            <div>
+              <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">PICKUP ID</span>
+              <h4 style="color: var(--secondary-hover); font-size:1.1rem;">${escapeHtml(c.id)}</h4>
+            </div>
+            <span class="badge badge-${c.status.toLowerCase().replace(' ', '-')}">${escapeHtml(c.status)}</span>
+          </div>
+
+          <div class="pickup-details" style="margin: 0.75rem 0;">
+            <div><strong>📦 Type:</strong> ${escapeHtml(c.wasteType)} (${escapeHtml(c.quantity)})</div>
+            <div><strong>📍 Address:</strong> ${escapeHtml(c.location)}</div>
+            <div><strong>📅 Preferred Slot:</strong> ${escapeHtml(c.date)} | ${escapeHtml(c.time)}</div>
+            <div><strong>👤 Resident:</strong> ${escapeHtml(c.requester || 'Citizen')}</div>
+            ${c.assignedAgent ? `<div><strong>👷 Assigned To:</strong> ${escapeHtml(c.assignedAgent)}</div>` : ''}
+          </div>
+
+          <div class="pickup-actions" style="display:flex; gap:0.5rem; margin-top:1rem;">
+            ${c.status === 'Pending' ? `
+              <button type="button" class="btn btn-sm btn-outline-primary" style="flex:1;" onclick="updateCollectionStatus('${c.id}', 'Assigned')">Accept Pickup</button>
+            ` : ''}
+            ${c.status === 'Assigned' ? `
+              <button type="button" class="btn btn-sm btn-secondary" style="flex:1;" onclick="updateCollectionStatus('${c.id}', 'In Progress')">Start Pickup</button>
+            ` : ''}
+            ${c.status === 'In Progress' ? `
+              <button type="button" class="btn btn-sm btn-success" style="flex:1;" onclick="updateCollectionStatus('${c.id}', 'Completed')">Mark Collected ✓</button>
+            ` : ''}
+            ${c.status === 'Completed' ? `
+              <button type="button" class="btn btn-sm btn-outline" style="flex:1;" disabled>✓ Completed</button>
+            ` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+
+  // 3. Assigned Grievance Reports Action Center
+  const reportsContainer = document.getElementById('agentReportsGrid');
+  if (reportsContainer) {
+    if (myReports.length === 0) {
+      reportsContainer.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 2.5rem; color: var(--text-muted); background:#fff; border-radius:var(--radius-md); border:1px solid var(--border);">No grievance reports assigned.</div>`;
+    } else {
+      reportsContainer.innerHTML = myReports.map(r => `
+        <div class="pickup-card">
+          <div class="pickup-card-header">
+            <div>
+              <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">REPORT ID</span>
+              <h4 style="color: var(--primary-dark); font-size:1.1rem;">${escapeHtml(r.id)}</h4>
+            </div>
+            <span class="badge badge-${r.status.toLowerCase().replace(' ', '-')}">${escapeHtml(r.status)}</span>
+          </div>
+
+          <div class="pickup-details" style="margin: 0.75rem 0;">
+            <div><strong>📢 Category:</strong> ${escapeHtml(r.wasteType)}</div>
+            <div><strong>📍 Location:</strong> ${escapeHtml(r.location)}</div>
+            <div><strong>⚠️ Severity:</strong> <span class="badge badge-priority-${r.priority.toLowerCase()}">${escapeHtml(r.priority)}</span></div>
+            <div><strong>👤 Reporter:</strong> ${escapeHtml(r.name)} (${escapeHtml(r.mobile)})</div>
+            <div><strong>📝 Note:</strong> ${escapeHtml(r.description)}</div>
+          </div>
+
+          <div class="pickup-actions" style="display:flex; gap:0.5rem; margin-top:1rem;">
+            ${r.status === 'Pending' ? `
+              <button type="button" class="btn btn-sm btn-outline-primary" style="flex:1;" onclick="updateReportStatus('${r.id}', 'Assigned')">Accept Task</button>
+            ` : ''}
+            ${r.status === 'Assigned' ? `
+              <button type="button" class="btn btn-sm btn-secondary" style="flex:1;" onclick="updateReportStatus('${r.id}', 'In Progress')">Start Clearance</button>
+            ` : ''}
+            ${r.status === 'In Progress' ? `
+              <button type="button" class="btn btn-sm btn-success" style="flex:1;" onclick="updateReportStatus('${r.id}', 'Resolved')">Mark Resolved ✓</button>
+            ` : ''}
+            ${r.status === 'Resolved' ? `
+              <button type="button" class="btn btn-sm btn-outline" style="flex:1;" disabled>✓ Site Cleared</button>
+            ` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+}
+
+// Cross-tab real-time sync via localStorage events
+window.addEventListener('storage', (e) => {
+  if (e.key && e.key.startsWith('smartwaste_')) {
+    if (typeof updateDashboard === 'function') updateDashboard();
+    if (typeof renderGramPanchayatDashboard === 'function') renderGramPanchayatDashboard();
+    if (typeof renderCleaningAgentDashboard === 'function') renderCleaningAgentDashboard();
+    if (typeof displayNotifications === 'function') displayNotifications();
+  }
+});
+
+// Export to window for global access
+window.STORAGE_KEYS = STORAGE_KEYS;
+window.loadReports = loadReports;
+window.saveReport = saveReport;
+window.loadCollections = loadCollections;
+window.saveCollection = saveCollection;
+window.loadGutterRequests = loadGutterRequests;
+window.saveGutterRequest = saveGutterRequest;
+window.loadCleaningAgents = loadCleaningAgents;
+window.assignCleaningAgentToGutter = assignCleaningAgentToGutter;
+window.updateGutterStatus = updateGutterStatus;
+window.assignAgentToCollection = assignAgentToCollection;
+window.assignAgentToReport = assignAgentToReport;
+window.updateReportStatus = updateReportStatus;
+window.updateCollectionStatus = updateCollectionStatus;
+window.switchDashboardTab = switchDashboardTab;
+window.loginUser = loginUser;
+window.renderGramPanchayatDashboard = renderGramPanchayatDashboard;
+window.renderCleaningAgentDashboard = renderCleaningAgentDashboard;
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.showToast = showToast;
+window.viewReport = viewReport;
+window.trackReport = trackReport;
+window.markAllNotificationsRead = markAllNotificationsRead;
+window.logoutUser = logoutUser;

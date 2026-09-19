@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gram Panchayat / Admin Dashboard - Clean Connect</title>
+  
+  <meta name="description" content="Gram Panchayat & Municipal Admin operations dashboard for waste monitoring, gutter cleaning assignments, and civic sanitation tracking.">
+  <meta name="theme-color" content="#10b981">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Design System Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .gp-header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      padding: 0.4rem 0.9rem;
+      border-radius: var(--radius-full);
+      font-size: 0.82rem;
+      font-weight: 700;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+    .portal-nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .gutter-badge-pill {
+      font-weight: 700;
+      padding: 0.25rem 0.65rem;
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body style="background-color: var(--bg-main);">
+
+  <!-- Top Portal Navigation -->
+  <header class="site-header">
+    <div class="container nav-container">
+      <div style="display:flex; align-items:center; gap:1.25rem;">
+        <a href="index.html" class="brand-logo" aria-label="Return to Home">
+          <div class="brand-icon">🏛️</div>
+          <span>Clean</span>Connect
+        </a>
+        <span class="gp-header-badge">Gram Panchayat / Admin Portal</span>
+      </div>
+
+      <div class="portal-nav-actions">
+        <span style="font-size:0.85rem; color:var(--text-muted); display:none; @media(min-width:768px){display:inline;}">
+          Status: <strong style="color:var(--primary-dark);">● Live Sync</strong>
+        </span>
+        <a href="cleaning-agent.html" target="_blank" class="btn btn-sm btn-outline-primary" title="Open Cleaning Agent Dashboard in a new tab">
+          Cleaning Agent Hub ↗
+        </a>
+        <a href="index.html" class="btn btn-sm btn-primary">
+          ← Citizen Portal
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="padding-top: 2.5rem; padding-bottom: 4rem;">
+
+    <!-- Gram Panchayat Title Banner -->
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem; margin-bottom: 2rem;">
+      <div>
+        <div class="section-tag">Civic Administration Command</div>
+        <h1 style="font-size: clamp(1.8rem, 3.5vw, 2.4rem); margin: 0.35rem 0;">Gram Panchayat Sanitation & Governance</h1>
+        <p style="color:var(--text-muted); max-width:720px;">
+          Manage ward-level grievances, direct cleaning agents, inspect drainage overflows, and coordinate zero-waste operations across all blocks.
+        </p>
+      </div>
+
+      <div style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
+        <button type="button" class="btn btn-outline" onclick="renderGramPanchayatDashboard(); showToast('Dashboard data refreshed', 'info');">
+          🔄 Refresh Data
+        </button>
+        <button type="button" class="btn btn-primary" onclick="openModal('modalNewGutter')">
+          + Log Gutter Request
+        </button>
+      </div>
+    </div>
+
+    <!-- Administrative Metric Widgets -->
+    <div class="stat-widget-grid" style="margin-bottom: 2.5rem;">
+      <div class="stat-widget">
+        <div class="widget-icon blue">📋</div>
+        <div class="widget-data">
+          <h4 id="gpStatTotalComplaints">0</h4>
+          <p>Total Complaints</p>
+        </div>
+      </div>
+      <div class="stat-widget">
+        <div class="widget-icon amber">⏳</div>
+        <div class="widget-data">
+          <h4 id="gpStatPendingComplaints">0</h4>
+          <p>Pending Grievances</p>
+        </div>
+      </div>
+      <div class="stat-widget">
+        <div class="widget-icon green">✅</div>
+        <div class="widget-data">
+          <h4 id="gpStatResolvedComplaints">0</h4>
+          <p>Resolved Grievances</p>
+        </div>
+      </div>
+      <div class="stat-widget">
+        <div class="widget-icon amber">🌊</div>
+        <div class="widget-data">
+          <h4 id="gpStatTotalGutter">0</h4>
+          <p>Gutter Complaints</p>
+        </div>
+      </div>
+      <div class="stat-widget">
+        <div class="widget-icon red">⚠️</div>
+        <div class="widget-data">
+          <h4 id="gpStatPendingGutter">0</h4>
+          <p>Gutters Pending</p>
+        </div>
+      </div>
+      <div class="stat-widget">
+        <div class="widget-icon green">✨</div>
+        <div class="widget-data">
+          <h4 id="gpStatCleanedGutter">0</h4>
+          <p>Gutters Cleaned</p>
+        </div>
+      </div>
+      <div class="stat-widget">
+        <div class="widget-icon blue">👷</div>
+        <div class="widget-data">
+          <h4 id="gpStatActiveAgents">5 On Duty</h4>
+          <p>Cleaning Agents</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================================================================
+         SECTION 1: GUTTER CLEANING & DRAINAGE CLEARANCE (Requirements 9 & 10)
+         ========================================================================= -->
+    <section class="card" id="gutterSection" style="margin-bottom: 2.5rem; border: 1.5px solid rgba(16, 185, 129, 0.3); box-shadow: var(--shadow-md);">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom: 1.5rem; border-bottom:1px solid var(--border); padding-bottom:1.25rem;">
+        <div>
+          <div style="display:flex; align-items:center; gap:0.6rem;">
+            <span style="font-size:1.5rem;">🌊</span>
+            <h2 style="font-size:1.45rem; margin:0;">Gutter Cleaning & Drainage Operations</h2>
+          </div>
+          <p style="font-size:0.9rem; color:var(--text-muted); margin-top:0.25rem;">
+            Real-time monitoring of open drainage blocks, silt accumulation, and assigned cleaning agents.
+          </p>
+        </div>
+
+        <div style="display:flex; gap:0.6rem; align-items:center;">
+          <input type="text" id="gpGutterSearchInput" class="form-control form-control-sm" placeholder="Search ward / landmark..." style="width:210px;" oninput="filterGutterTable()">
+          <select id="gpGutterFilterStatus" class="form-control form-control-sm" style="width:150px;" onchange="filterGutterTable()">
+            <option value="all">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="Assigned">Assigned</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Cleaned">Cleaned</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table-custom" id="gpGutterTable">
+          <thead>
+            <tr>
+              <th>Request ID</th>
+              <th>Resident / Contact</th>
+              <th>Drainage Location & Landmark</th>
+              <th>Urgency</th>
+              <th>Date Logged</th>
+              <th>Current Status</th>
+              <th>Assign Cleaning Agent</th>
+              <th>Update Status</th>
+            </tr>
+          </thead>
+          <tbody id="gpGutterTableBody">
+            <!-- Rendered by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         SECTION 2: GENERAL CITIZEN WASTE REPORTS MANAGEMENT
+         ========================================================================= -->
+    <section class="card" style="margin-bottom: 2.5rem;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.25rem;">
+        <div>
+          <h3 style="margin:0;">Citizen Waste Complaints Management</h3>
+          <p style="font-size:0.88rem; color:var(--text-muted); margin-top:0.25rem;">
+            Review reported garbage dumps, assign field workers, and verify resolved statuses.
+          </p>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table-custom">
+          <thead>
+            <tr>
+              <th>Report ID</th>
+              <th>Reporter</th>
+              <th>Waste Type</th>
+              <th>Location</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Assign Cleaning Agent</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody id="gpReportsTableBody">
+            <!-- Rendered by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         SECTION 3: DOOR-TO-DOOR COLLECTION REQUESTS
+         ========================================================================= -->
+    <section class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.25rem;">
+        <div>
+          <h3 style="margin:0;">Scheduled Door-to-Door Pickups</h3>
+          <p style="font-size:0.88rem; color:var(--text-muted); margin-top:0.25rem;">
+            Allocate collection trucks and staff for bulk household or commercial recyclable requests.
+          </p>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table-custom">
+          <thead>
+            <tr>
+              <th>Collection ID</th>
+              <th>Type & Quantity</th>
+              <th>Pickup Address</th>
+              <th>Preferred Date / Slot</th>
+              <th>Status</th>
+              <th>Assign Cleaning Agent</th>
+            </tr>
+          </thead>
+          <tbody id="gpCollectionsTableBody">
+            <!-- Rendered by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal: Log New Gutter Cleaning Request -->
+  <div class="modal-overlay" id="modalNewGutter">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Log Gutter Cleaning Task</h3>
+        <button type="button" class="modal-close" data-close-modal="modalNewGutter">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="gpNewGutterForm" onsubmit="handleNewGutterSubmit(event)">
+          <div class="form-group">
+            <label class="form-label">Resident / Complainant Name *</label>
+            <input type="text" id="ngResident" class="form-control" placeholder="e.g. Anand Sharma" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contact Mobile *</label>
+            <input type="tel" id="ngMobile" class="form-control" placeholder="e.g. 9876543210" maxlength="10" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Gutter / Drainage Location & Ward *</label>
+            <input type="text" id="ngLocation" class="form-control" placeholder="e.g. Ward 4, Opposite Gram Panchayat Office" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Severity Level</label>
+            <select id="ngPriority" class="form-control">
+              <option value="High">🔴 High (Overflowing / Health Risk)</option>
+              <option value="Medium" selected>🟡 Medium (Clogged Silt / Slow Drain)</option>
+              <option value="Low">🟢 Low (Routine Pre-Monsoon Maintenance)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Issue Details</label>
+            <textarea id="ngDescription" class="form-control" rows="3" placeholder="Describe drainage blockage or silt level..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Assign Cleaning Agent Immediately</label>
+            <select id="ngAgent" class="form-control">
+              <option value="Unassigned">-- Assign Later --</option>
+              <option value="Ramesh Kumar">Ramesh Kumar (Ward 1 & 2)</option>
+              <option value="Suresh Yadav">Suresh Yadav (Ward 3 & 4)</option>
+              <option value="Rajesh Shinde">Rajesh Shinde (Ward 5 & 6)</option>
+              <option value="Sunita Devi">Sunita Devi (Ward 7)</option>
+              <option value="Vikram Singh">Vikram Singh (Drainage Unit)</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%;">Create Task & Dispatch</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: View Report Details -->
+  <div class="modal-overlay" id="modalViewReport">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Grievance Details: <span id="viewModalReportId" style="color:var(--primary-dark);">-</span></h3>
+        <button type="button" class="modal-close" data-close-modal="modalViewReport">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:grid; gap:0.75rem; font-size:0.92rem;">
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--text-muted);">Reported By:</span>
+            <strong id="viewModalName">-</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--text-muted);">Contact Phone:</span>
+            <span id="viewModalMobile">-</span>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--text-muted);">Category:</span>
+            <strong id="viewModalType">-</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--text-muted);">Location:</span>
+            <span id="viewModalLocation">-</span>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--text-muted);">Submission Date:</span>
+            <span id="viewModalDate">-</span>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--text-muted);">Severity:</span>
+            <span id="viewModalPriority" class="badge badge-priority-medium">-</span>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--text-muted);">Status:</span>
+            <span id="viewModalStatus" class="badge badge-pending">-</span>
+          </div>
+          <div style="border-top:1px solid var(--border); padding-top:0.75rem; margin-top:0.5rem;">
+            <span style="color:var(--text-muted); display:block; margin-bottom:0.25rem;">Description:</span>
+            <p id="viewModalDesc" style="color:var(--text-main); font-size:0.9rem;">-</p>
+          </div>
+          <div>
+            <img id="viewModalImage" src="" alt="Waste Incident Photo" style="width:100%; max-height:220px; object-fit:cover; border-radius:var(--radius-md); border:1px solid var(--border); display:none; margin-top:0.5rem;">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" data-close-modal="modalViewReport">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <!-- Application Logic -->
+  <script src="js/script.js"></script>
+  <script>
+    // Local filter for Gutter Requests Table
+    function filterGutterTable() {
+      const q = (document.getElementById('gpGutterSearchInput').value || '').toLowerCase().trim();
+      const statusFilter = document.getElementById('gpGutterFilterStatus').value;
+      const rows = document.querySelectorAll('#gpGutterTableBody tr');
+      
+      rows.forEach(r => {
+        const text = r.textContent.toLowerCase();
+        const matchesQuery = !q || text.includes(q);
+        const matchesStatus = statusFilter === 'all' || text.includes(statusFilter.toLowerCase());
+        r.style.display = (matchesQuery && matchesStatus) ? '' : 'none';
+      });
+    }
+
+    // Handle creation of new gutter task directly by Gram Panchayat
+    function handleNewGutterSubmit(e) {
+      e.preventDefault();
+      const resident = document.getElementById('ngResident').value.trim();
+      const mobile = document.getElementById('ngMobile').value.trim();
+      const location = document.getElementById('ngLocation').value.trim();
+      const priority = document.getElementById('ngPriority').value;
+      const desc = document.getElementById('ngDescription').value.trim() || 'Urgent gutter clearance requested by Panchayat.';
+      const agent = document.getElementById('ngAgent').value;
+
+      const requests = loadGutterRequests();
+      const nextNum = requests.length + 1;
+      const id = `GC-2026-${String(nextNum).padStart(3, '0')}`;
+      const now = new Date();
+      const formattedDate = now.toLocaleString('en-US', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true });
+
+      const newGutterReq = {
+        id: id,
+        residentName: resident,
+        mobile: mobile,
+        location: location,
+        description: desc,
+        priority: priority,
+        status: agent !== 'Unassigned' ? 'Assigned' : 'Pending',
+        assignedAgent: agent,
+        date: formattedDate
+      };
+
+      saveGutterRequest(newGutterReq);
+      createNotification(`New Gutter task ${id} logged for ${location}`, 'warning');
+      showToast(`Gutter task ${id} created and dispatched`, 'success');
+      
+      document.getElementById('gpNewGutterForm').reset();
+      closeModal('modalNewGutter');
+      renderGramPanchayatDashboard();
+    }
+  </script>
+</body>
+</html>

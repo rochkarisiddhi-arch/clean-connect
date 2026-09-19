@@ -275,11 +275,11 @@
           <!-- Service 5 -->
           <div class="service-card">
             <div>
-              <div class="feature-icon-wrapper">🛡️</div>
-              <h3>5. Municipal Monitoring</h3>
-              <p>Municipal ward dashboard for monitoring open tickets, allocating collection trucks, and verifying clearance.</p>
+              <div class="feature-icon-wrapper">🏛️</div>
+              <h3>5. Gram Panchayat / Admin</h3>
+              <p>Gram Panchayat command portal for monitoring civic grievances, allocating cleaning agents, and managing gutter cleaning.</p>
             </div>
-            <a href="#dashboards" class="btn btn-outline-primary" onclick="switchDashboardTab('adminDashboardView')">Admin Monitor →</a>
+            <a href="gram-panchayat.html" target="_blank" class="btn btn-outline-primary">Gram Panchayat Portal ↗</a>
           </div>
 
           <!-- Service 6 -->
@@ -335,6 +335,7 @@
                   <option value="Food Waste">Food Waste</option>
                   <option value="E-Waste">E-Waste</option>
                   <option value="Construction Waste">Construction Waste</option>
+                  <option value="Gutter Cleaning">Gutter Cleaning / Drainage Overflow</option>
                   <option value="Mixed Waste">Mixed Waste</option>
                   <option value="Other">Other</option>
                 </select>
@@ -613,14 +614,14 @@
 
         <!-- Dashboard Role Tabs -->
         <div class="dashboard-tabs">
-          <button type="button" class="tab-btn active" data-target="citizenDashboardView">
-            👤 Citizen Dashboard
+          <button type="button" class="tab-btn active" data-target="citizenDashboardView" title="Main Citizen Portal">
+            👤 User / Citizen Dashboard
           </button>
-          <button type="button" class="tab-btn" data-target="collectorDashboardView">
-            🚛 Collector Dashboard
+          <button type="button" class="tab-btn" data-target="collectorDashboardView" title="Opens Cleaning Agent Dashboard in a new tab">
+            🚛 Cleaning Agent Dashboard ↗
           </button>
-          <button type="button" class="tab-btn" data-target="adminDashboardView">
-            🏛️ Municipal Admin Dashboard
+          <button type="button" class="tab-btn" data-target="adminDashboardView" title="Opens Gram Panchayat Dashboard in a new tab">
+            🏛️ Gram Panchayat / Admin Dashboard ↗
           </button>
         </div>
 
@@ -1148,9 +1149,9 @@
           <div class="form-group">
             <label for="demoRoleSelect" class="form-label">Select Persona / User Type</label>
             <select id="demoRoleSelect" class="form-control" required>
-              <option value="citizen">Citizen (File reports & track collections)</option>
-              <option value="collector">Waste Collector (Accept & clear assigned pickups)</option>
-              <option value="admin">Municipal Admin (Monitor reports & update statuses)</option>
+              <option value="citizen">User / Citizen (File reports & track collections)</option>
+              <option value="collector">Cleaning Agent (View & clear assigned tasks)</option>
+              <option value="admin">Gram Panchayat / Admin (Manage reports, gutter cleaning & assign agents)</option>
             </select>
           </div>
           <div class="form-group">
@@ -1200,9 +1201,9 @@
         <div class="footer-col">
           <h4>Dashboards</h4>
           <ul class="footer-links">
-            <li><a href="#dashboards" onclick="switchDashboardTab('citizenDashboardView')">Citizen Portal</a></li>
-            <li><a href="#dashboards" onclick="switchDashboardTab('collectorDashboardView')">Collector Hub</a></li>
-            <li><a href="#dashboards" onclick="switchDashboardTab('adminDashboardView')">Municipal Admin</a></li>
+            <li><a href="#dashboards" onclick="switchDashboardTab('citizenDashboardView')">User / Citizen Portal</a></li>
+            <li><a href="cleaning-agent.html" target="_blank">Cleaning Agent Hub ↗</a></li>
+            <li><a href="gram-panchayat.html" target="_blank">Gram Panchayat Admin ↗</a></li>
             <li><a href="#analytics">Live Analytics</a></li>
           </ul>
         </div>
