@@ -1532,6 +1532,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // 10. Dashboard Tab Buttons
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', function() {
+      const href = this.getAttribute('href');
+      if (href && !href.startsWith('#')) {
+        // Direct link with valid destination - native browser event opens in new tab
+        return;
+      }
       const target = this.getAttribute('data-target');
       if (target) switchDashboardTab(target);
     });
